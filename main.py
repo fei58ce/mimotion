@@ -39,6 +39,16 @@ def get_min_max_by_time(hour=None, minute=None):
     return int(time_rate * min_step), int(time_rate * max_step)
 
 
+def get_step_range(slot):
+    if slot == "midday":
+        return 16000, 17000
+    if slot == "afternoon":
+        return 18000, 22000
+    if slot == "auto":
+        return get_min_max_by_time()
+    raise ValueError(f"未知的步数时段：{slot}")
+
+
 # 虚拟ip地址
 def fake_ip():
     # 随便找的国内IP段：223.64.0.0 - 223.117.255.255
@@ -346,7 +356,7 @@ if __name__ == "__main__":
     if users is None or passwords is None:
         print("未正确配置账号密码，无法执行")
         exit(1)
-    min_step, max_step = get_min_max_by_time()
+    min_step, max_step = get_step_range(os.environ.get("STEP_SLOT", "auto"))
     use_concurrent = config.get('USE_CONCURRENT')
     if use_concurrent is not None and use_concurrent == 'True':
         use_concurrent = True

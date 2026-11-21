@@ -2,8 +2,19 @@ name: 刷步数
 
 on:
   schedule:
-    - cron: '54 8,14 * * *'
+    - cron: '30 3 * * *' # 北京时间 11:30
+    - cron: '0 9 * * *' # 北京时间 17:00
   workflow_dispatch:
+    inputs:
+      step_slot:
+        description: '步数范围（midday: 16000–17000，afternoon: 18000–22000，auto: 按时间计算）'
+        type: choice
+        required: true
+        default: auto
+        options:
+          - auto
+          - midday
+          - afternoon
 
 jobs:
   build:
@@ -28,6 +39,10 @@ jobs:
         env:
             CONFIG: ${{ secrets.CONFIG }}
             AES_KEY: ${{ secrets.AES_KEY }}
+            STEP_SLOT: >-
+              ${{ github.event.schedule == '30 3 * * *' && 'midday'
+                  || github.event.schedule == '0 9 * * *' && 'afternoon'
+                  || inputs.step_slot || 'auto' }}
         run: |
           pip3 install -r requirements.txt
           python3 main.py
